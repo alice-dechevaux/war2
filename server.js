@@ -1,6 +1,10 @@
 const express = require("express")
+const cors = require("cors")
 const app = express()
 const PORT = 8000
+
+app.use(cors())
+app.use(express.static("public"))
 
 app.get("/", (request, response) => {
     response.sendFile(__dirname + "/index.html")
@@ -12,22 +16,22 @@ app.get("/api/:playerNumber", (request, response) => {
     
             let winner
     
-            let suit = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
-            let suits = ["♣", "♦", "♥", "♠"]
+            const suit = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
+            const suits = ["♣", "♦", "♥", "♠"]
     
             let hand1
             let hand2
     
             let playedCards
     
-            let deck = []
+            const deck = []
     
         //This function dynamically generates a deck of cards
     
           function createDeck(suit, suits) {
             for (let i in suits) {
               for (let j in suit) {
-                let card = {
+                const card = {
                   display: suit[j] + suits[i],
                   value: j
                 }
@@ -76,14 +80,14 @@ app.get("/api/:playerNumber", (request, response) => {
               playedCards = [[],[]]
               playedCards[0].push(hand1.shift()) 
               playedCards[1].push(hand2.shift())
-              checkForWin(playedCards)
+              checkForWin()
               counter++
             }
           }
     
         //This function compares the values of the played cards and determines a winner or a draw. If there is a winner the played cards are pushed to their hand. If there is a draw the war function is called with playedCards provided as an argument.
           
-          function checkForWin(playedCards) {
+          function checkForWin() {
             if (playedCards[0].length > playedCards[1].length || playedCards[0][playedCards[0].length - 1].value > playedCards[1][playedCards[1].length - 1].value) {
               for (let i = 0; i < playedCards.length; i++) {
                 for (let j = 0; j < playedCards[i].length; j++) {
@@ -97,13 +101,13 @@ app.get("/api/:playerNumber", (request, response) => {
                 }
               }
             } else {
-              war(playedCards)
+              war()
             }
           }
     
         //This function simulates war by adding four more cards from each player's hand to the playedCards array. It then calls the checkForWin function again with the updated playedCards array provided as an argument.
     
-          function war(playedCards) {
+          function war() {
             for (let i = 0; i < 4; i++) {
               if (hand1.length) {
                 playedCards[0].push(hand1.shift())
@@ -112,13 +116,13 @@ app.get("/api/:playerNumber", (request, response) => {
                 playedCards[1].push(hand2.shift())
               }
             }
-            checkForWin(playedCards)
+            checkForWin()
           }
     
           playHand()
     
       
-      //This code determines whether or not there is a winner. If either player has lost all of their cards and, as such, the array representing their hand is emtpy, then the other player wins. If neither has lost all of their cards then there is a draw. The winner variable is updated to string representing the outcome.
+      //This code determines whether or not there is a winner. If either player has lost all of their cards and, as such, the array representing their hand is emtpy, then the other player wins. If neither has lost all of their cards then there is a draw. The winner variable is updated to a string representing the outcome.
     
           if (!hand1.length) {
             winner = "2"
@@ -150,8 +154,6 @@ app.get("/api/:playerNumber", (request, response) => {
             })
           }
 })
-
-app.use(express.static("public"))
 
 app.listen(process.env.PORT || PORT, () => {
     console.log(`Server is running on port ${PORT}`)
